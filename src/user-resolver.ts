@@ -1,4 +1,3 @@
-import { Token } from "graphql";
 import { Arg, Ctx, Field, InputType, Mutation, Query, Resolver, ObjectType } from 'type-graphql';
 import { Context, context } from './context';
 import { User } from "./user";
@@ -48,7 +47,7 @@ export class UserResolver {
   }
 
   @Mutation((returns) => UserWithToken)
-  async login(@Arg('data') data: UserInputData, @Ctx() ctx: Context): Promise<User & { token: string } | null> {
+  async login(@Arg('data') data: UserInputData, @Ctx() ctx: Context): Promise<{ user: User, token: string } | null> {
     const user = await ctx.prisma.users.findUnique({ where: { email: data.email } })
 
     if (!user) return null
@@ -61,6 +60,6 @@ export class UserResolver {
 
     const token = await ctx.prisma.tokens.create({ data: { token: tokenCode, user: { connect: { id: user.id } } } })
 
-    return { ...user, token: token.token }
+    return { user, token: token.token }
   }
 }
